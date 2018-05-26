@@ -91,6 +91,8 @@ void move_group::OnlineCollisionPredictor::initialize() {
 
 void move_group::OnlineCollisionPredictor::continuous_predict() {
   ros::Rate rate(rate_);
+  // force velocities to be copied from joint_state
+  context_->planning_scene_monitor_->getStateMonitorNonConst()->enableCopyDynamics(true);
 
   while (ros::ok()) {
     // force update to latest received joint state
