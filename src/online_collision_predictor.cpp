@@ -104,10 +104,22 @@ void move_group::OnlineCollisionPredictor::continuous_predict() {
       robot_state::RobotState &predicted_state =
           prediction->getCurrentStateNonConst();
 
+      // dirty hack to not consider the hand joints 
+      // TODO correctly read a parameter to select the desired groups to listen to
+      const std::vector<std::string> joint_names = predicted_state.getVariableNames();
+
       double *positions = predicted_state.getVariablePositions();
       double *velocities = predicted_state.getVariableVelocities();
       for (int i = 0; i < predicted_state.getVariableCount(); ++i)
-        positions[i] += horizon_ * velocities[i];
+      {
+        // dirty hack only do prediction if not hand joints
+        // TODO use the selection vector
+        if (joint_names[i].find("rh_") == std::string::npos &&
+            joint_names[i].find("lh_") == std::string::npos)
+        {
+          positions[i] += horizon_ * velocities[i];
+        }
+      }
 
       predicted_state.enforceBounds();
 
